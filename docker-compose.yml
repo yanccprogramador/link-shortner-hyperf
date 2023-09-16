@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  image:
+    container_name: link-shortener
+    image: link-shortener
+    build:
+      context: .
+      args:
+        APP_STAGE: dev
+  bin: &base
+    container_name: bin.link-shortener
+    image: link-shortener
+    profiles: [ "bin" ]
+    depends_on:
+      - image
+    entrypoint: [ 'php', 'bin/hyperf.php' ]
+    env_file:
+      - .env
+    volumes:
+      - ./:/opt/www
+  composer:
+    <<: *base
+    container_name: composer.link-shortener
+    profiles: [ "composer" ]
+    entrypoint: [ "composer" ]
+    command: validate
+  app:
+    container_name: app.link-shortener
+    image: link-shortener
+    depends_on:
+      - image
+    env_file:
+      - .env
+    volumes: 
+      - ./:/opt/www
+    ports: 
+     - 9501:9501
